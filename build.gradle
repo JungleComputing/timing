@@ -76,7 +76,7 @@ publishing {
 		classifier "javadoc"
 	    }
 	    groupId 'nl.junglecomputing'
-	    artifactId 'pidgin'
+	    artifactId 'timing'
 	    version version
 
 	    pom.withXml {
@@ -104,9 +104,9 @@ bintray {
     pkg {
 	// TODO! Which repo? We can also put it in junglecomputing ...
 	repo = 'JungleComputing'
-	name = 'pidgin'
+	name = 'timing'
 	userOrg = "$user"
-	vcsUrl = 'https://github.com/JungleComputing/pidgin.git'
+	vcsUrl = 'https://github.com/JungleComputing/timing.git'
 	licenses = ['Apache-2.0']
     }
 }
