@@ -17,41 +17,57 @@
 package nl.junglecomputing.timer;
 
 /**
- * The Timer interface provides user-access to the timing mechanism used internally in constellation. Applications can create
- * Timers through {@link Constellation#getTimer()} or {@link Constellation#getTimer(String, String, String)}. Of particular
- * interest is the so-called "overall timer", to be accessed by {@link Constellation#getOverallTimer()}, and to be started when
- * the application starts and stopped when the application finishes.
+ * The Timer interface provides user-access to the timing mechanism used internally in constellation. Applications can create Timers through
+ * {@link Constellation#getTimer()} or {@link Constellation#getTimer(String, String, String)}. Of particular interest is the so-called "overall timer", to be
+ * accessed by {@link Constellation#getOverallTimer()}, and to be started when the application starts and stopped when the application finishes.
  *
- * A Timer records various times, such as queued, submitted, start, stop (similar to openCL events), but usually only start and
- * stop are used. Each timer event also has associated with it a device name (for instance "java" or "gtx480"), a thread name
- * (usually the executor identifier), and an action name, for instance "initialize" or "process".
+ * A Timer records various times, such as queued, submitted, start, stop (similar to openCL events), but usually only start and stop are used. Each timer event
+ * also has associated with it a device name (for instance "java" or "gtx480"), a thread name (usually the executor identifier), and an action name, for
+ * instance "initialize" or "process".
  *
- * Constellation uses some properties to control the behavior of the timers. The {@link ConstellationProperties#PROFILE} property
- * controls the timing. When the {@link ConstellationProperties#PROFILE_ACTIVITY} is set timings will be provided for, a.o., the
- * invocations of {@link Activity#initialize} and {@link Activity#process}. In the end, the timing events will be written
- * to a file specified with the {@link ConstellationProperties#PROFILE_OUTPUT} property, or to <code>System.out</code>.
+ * Constellation uses some properties to control the behavior of the timers. The {@link ConstellationProperties#PROFILE} property controls the timing. When the
+ * {@link ConstellationProperties#PROFILE_ACTIVITY} is set timings will be provided for, a.o., the invocations of {@link Activity#initialize} and
+ * {@link Activity#process}. In the end, the timing events will be written to a file specified with the {@link ConstellationProperties#PROFILE_OUTPUT} property,
+ * or to <code>System.out</code>.
  */
 public interface Timer {
 
     /**
      * Starts a timer event.
      *
-     * @return the event number, to be used when the timer is stopped.
+     * @return the event number, to be used when the timer is stopped, cancelled, or data is added.
      */
     int start();
 
     /**
-     * Stops a timer event. Unused event numbers are silently ignored.
+     * Starts a named timer event.
+     *
+     * @param action
+     *            the name of the event
+     * @return the event number, to be used when the timer is stopped, cancelled, or data is added.
+     */
+    int start(String action);
+
+    /**
+     * Stops a timer event. Unused event numbers are silently ignored, cancelled, or data is added.
      *
      * @param eventNo
-     *            the event number.
+     *            the event number to stop.
      */
     void stop(int eventNo);
 
     /**
-     * Adds a completed event to the Timer. This may be useful if for instance the time values are recorded by a GPU, or come from
-     * another source. Note that the times are to be provided in nanoseconds and that, to get meaningful results with respect to
-     * other events, the provided times need to be "in sync" with {@link System#nanoTime()}.
+     * Cancel a timer event. Unused event numbers are silently ignored, cancelled, or data is added.
+     *
+     * @param eventNo
+     *            the event number to cancel.
+     */
+    void cancel(int evt);
+
+    /**
+     * Adds a completed event to the Timer. This may be useful if for instance the time values are recorded by a GPU, or come from another source. Note that the
+     * times are to be provided in nanoseconds and that, to get meaningful results with respect to other events, the provided times need to be "in sync" with
+     * {@link System#nanoTime()}.
      *
      * @param device
      *            the device name
@@ -71,12 +87,12 @@ public interface Timer {
     void add(String device, String thread, String action, long queued, long submitted, long start, long end);
 
     /**
-     * Adds a completed event to the Timer. This may be useful if for instance the time values are recorded by a GPU, or come from
-     * another source. Note that the times are to be provided in nanoseconds and that, to get meaningful results with respect to
-     * other events, the provided times need to be "in sync" with {@link System#nanoTime()}.
+     * Adds a completed event to the Timer. This may be useful if for instance the time values are recorded by a GPU, or come from another source. Note that the
+     * times are to be provided in nanoseconds and that, to get meaningful results with respect to other events, the provided times need to be "in sync" with
+     * {@link System#nanoTime()}.
      *
-     * This version has no separate queued or submitted time. These are assumed to be equal to the start time. The device, thread
-     * and action names are taken from the timer itself.
+     * This version has no separate queued or submitted time. These are assumed to be equal to the start time. The device, thread and action names are taken
+     * from the timer itself.
      *
      * @param start
      *            time when event was started, in nanoseconds
@@ -84,6 +100,16 @@ public interface Timer {
      *            time when event finished, in nanoseconds
      */
     void add(long start, long end);
+
+    /**
+     * Adds a byte count to a specific event. Note that this overwrites any previous byte count contained in the event.
+     * 
+     * @param nrBytes
+     *            the byte count to store in the event.
+     * @param eventNo
+     *            the event number to store the byte count in.
+     */
+    void addBytes(long nrBytes, int eventNo);
 
     /**
      * Returns the number of events recorded for this Timer.

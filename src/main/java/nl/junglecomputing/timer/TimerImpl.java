@@ -243,7 +243,7 @@ public class TimerImpl implements java.io.Serializable, nl.junglecomputing.timer
     }
 
     public TimerImpl(String nodeId) {
-        this(nodeId, null, null, null);
+        this(nodeId, "none", "none", "none");
     }
 
     public TimerImpl(String nodeId, String standardDevice, String standardThread, String standardAction) {
